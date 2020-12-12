@@ -1,4 +1,5 @@
 package com.brianpritchett.twopluslist
+
 import munit._
 import org.scalacheck.Prop._
 import org.scalacheck.Gen._
@@ -137,7 +138,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         l.filter(_ == atIdx) == l.toList.filter(_ == atIdx)
       }
@@ -149,7 +150,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         l.filter(_ == atIdx).forall(_ == atIdx)
       }
@@ -161,7 +162,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         l.filterNot(_ == atIdx) == l.toList.filterNot(_ == atIdx)
       }
@@ -173,7 +174,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         l.filterNot(_ == atIdx).forall(_ != atIdx)
       }
@@ -185,7 +186,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         val filt = l.filter(_ == atIdx)
         val filtNot = l.filterNot(_ == atIdx)
@@ -202,7 +203,7 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       Gen.posNum[Int],
       arbitrary[TwoPlusList[Int]]
     ) { (i: Int, l: TwoPlusList[Int]) =>
-      (i <= l.size - 1) ==> {
+      (i < l.size) ==> {
         val atIdx = l(i)
         l.find(_ == atIdx) == Some(atIdx)
       }
@@ -224,6 +225,63 @@ class TwoPlusListSuite extends ScalaCheckSuite {
   property("collect") {
     forAll { l: TwoPlusList[Option[Int]] =>
       l.collect { case Some(i) => i } == l.flatten
+    }
+  }
+
+  property("exists finds an element when it is present") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      i < l.size ==> {
+        val atIdx = l(i)
+        l.exists(_ == atIdx)
+      }
+    }
+  }
+
+  property("exists finds no element if it is missing") {
+    forAll { l: TwoPlusList[Int] =>
+      !l.exists(i => i == i + 1)
+    }
+  }
+
+  property("can always drop 2") {
+    forAll { l: TwoPlusList[Int] =>
+      l.drop(2) == l.toList.drop(2)
+    }
+  }
+
+  property("dropping zero is same as toList") {
+    forAll { l: TwoPlusList[Int] =>
+      l.drop(0) == l.toList
+    }
+  }
+
+  property("drop is same as toList then drop") {
+    forAll(
+      arbitrary[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      l.drop(i) == l.toList.drop(i)
+    }
+  }
+
+  property("foldLeft") {
+    forAll { l: TwoPlusList[Int] =>
+      l.foldLeft(0){ case (size, _) => size + 1} == l.size
+    }
+  }
+
+  property("take size is same as toList") {
+    forAll { l: TwoPlusList[Int] =>
+      l.take(l.size) == l.toList
+    }
+  }
+
+  property("take one is head") {
+    forAll { l: TwoPlusList[Int] =>
+      l.take(1) == List(l.head)
     }
   }
 }

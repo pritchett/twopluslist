@@ -54,7 +54,6 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) exten
     else tailC
   }
 
-
   def find(p: A => Boolean): Option[A] = {
     if(p(head)) Some(head)
     else if(p(body)) Some(body)
@@ -73,6 +72,19 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) exten
     toList.flatten
 
   override def iterator: Iterator[A] = toList.iterator
+
+  def drop(i: Int): List[A] = {
+    if(i <= 0) toList
+    else if (i == 1) body :: tail
+    else if (i == 2) tail
+    else tail.drop(i - 2)
+  }
+
+  def foldLeft[B](z: B)(op: (B, A) => B): B = {
+    val rHead = op(z, head)
+    val rBody = op(rHead, body)
+    tail.foldLeft(rBody)(op)
+  }
 
 }
 
