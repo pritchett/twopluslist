@@ -1,7 +1,8 @@
 package com.brianpritchett.twopluslist
 import scala.collection.immutable.Nil
 
-final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) {
+final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) extends IterableOnce[A] {
+
   import TwoPlusList._
 
   def toList: List[A] = head :: body :: tail
@@ -40,7 +41,7 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) {
     else fTail
   }
 
-  def filterNot(p: A => Boolean): List[A] = filter(p andThen (b => !b))
+  def filterNot(p: A => Boolean): List[A] = filter(p andThen (!_))
 
   def collect[B](pf: PartialFunction[A, B]): List[B] = {
     val headDefined = pf.isDefinedAt(head)
@@ -53,6 +54,7 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) {
     else tailC
   }
 
+
   def find(p: A => Boolean): Option[A] = {
     if(p(head)) Some(head)
     else if(p(body)) Some(body)
@@ -60,13 +62,17 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) {
   }
 
   def forall(p: A => Boolean): Boolean = p(head) && p(body) && tail.forall(p)
-
   def contains[A1 >: A](a: A1): Boolean = (head == a) || (body == a) || tail.contains(a)
 
   def apply(i: Int) = {
     if (i < 0) throw new IndexOutOfBoundsException(i)
     if (i == 0) head else if (i == 1) body else tail(i - 2)
   }
+
+  def flatten[B](implicit a: A => scala.collection.IterableOnce[B]): List[B] =
+    toList.flatten
+
+  override def iterator: Iterator[A] = toList.iterator
 
 }
 
@@ -80,4 +86,7 @@ object TwoPlusList {
     case head :: body :: tail  => Some(TwoPlusList(head, body, tail))
     case _ =>  None
   }
+
+  def fromListUnsafe[A](ls: List[A]) = fromList(ls).get
+
 }

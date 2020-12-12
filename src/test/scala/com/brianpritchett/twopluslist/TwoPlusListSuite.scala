@@ -119,4 +119,111 @@ class TwoPlusListSuite extends ScalaCheckSuite {
       }
     }
   }
+
+  property("prepend then toList is same as toList then prepend") {
+    forAll { (l: TwoPlusList[Int], i: Int) =>
+      (i :: l).toList == i :: l.toList
+    }
+  }
+
+  property("append then toList is same as toList then append") {
+    forAll { (l: TwoPlusList[Int], i: Int) =>
+      (l :+ i).toList == l.toList :+ i
+    }
+  }
+
+  property("filter is same as toList then filter") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        l.filter(_ == atIdx) == l.toList.filter(_ == atIdx)
+      }
+    }
+  }
+
+  property("filter only keeps elements matching predicate") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        l.filter(_ == atIdx).forall(_ == atIdx)
+      }
+    }
+  }
+
+  property("filterNot is same as toList then filterNot") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        l.filterNot(_ == atIdx) == l.toList.filterNot(_ == atIdx)
+      }
+    }
+  }
+
+  property("filterNot removes elements matching predicate") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        l.filterNot(_ == atIdx).forall(_ != atIdx)
+      }
+    }
+  }
+
+  property("filter and filterNot get all elements of list") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        val filt = l.filter(_ == atIdx)
+        val filtNot = l.filterNot(_ == atIdx)
+
+        l.forall(e => filt.contains(e) || filtNot.contains(e)) &&
+        filt.forall(l.contains) &&
+        filtNot.forall(l.contains)
+      }
+    }
+  }
+
+  property("find returns Some(element) if it matches predicate") {
+    forAll(
+      Gen.posNum[Int],
+      arbitrary[TwoPlusList[Int]]
+    ) { (i: Int, l: TwoPlusList[Int]) =>
+      (i <= l.size - 1) ==> {
+        val atIdx = l(i)
+        l.find(_ == atIdx) == Some(atIdx)
+      }
+    }
+  }
+
+  property("find returns None if nothing matches predicate") {
+    forAll { l: TwoPlusList[Int] =>
+      l.find(_ => false).isEmpty
+    }
+  }
+
+  property("flatten is same as toList then flatten") {
+    forAll { ls: TwoPlusList[TwoPlusList[Int]] =>
+      ls.flatten == ls.toList.flatten
+    }
+  }
+
+  property("collect") {
+    forAll { l: TwoPlusList[Option[Int]] =>
+      l.collect { case Some(i) => i } == l.flatten
+    }
+  }
 }
