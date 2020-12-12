@@ -59,11 +59,20 @@ final case class TwoPlusList[+A] private (head: A, body: A, tail: List[A]) {
     else tail.find(p)
   }
 
+  def forall(p: A => Boolean): Boolean = p(head) && p(body) && tail.forall(p)
+
+  def contains[A1 >: A](a: A1): Boolean = (head == a) || (body == a) || tail.contains(a)
+
+  def apply(i: Int) = {
+    if (i < 0) throw new IndexOutOfBoundsException(i)
+    if (i == 0) head else if (i == 1) body else tail(i - 2)
+  }
+
 }
 
 object TwoPlusList {
 
-  def of[A](a1: A, a2: A, as: A*): TwoPlusList[A] = new TwoPlusList(a1, a2, as.toList)
+  def of[A](a1: A, a2: A, a3: A*): TwoPlusList[A] = new TwoPlusList(a1, a2, a3.toList)
 
   def two[A](a1: A, a2: A): TwoPlusList[A] = of(a1, a2)
 
