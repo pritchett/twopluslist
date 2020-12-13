@@ -267,6 +267,13 @@ class TwoPlusListSuite extends ScalaCheckSuite {
     }
   }
 
+  property("flatMap") {
+    forAll { l: TwoPlusList[Int] =>
+      l.flatMap(i => TwoPlusList.two(i, i)) == TwoPlusList.fromListUnsafe(l.toList.flatMap(i => List(i, i)))
+    }
+
+  }
+
   property("foldLeft") {
     forAll { l: TwoPlusList[Int] =>
       l.foldLeft(0){ case (size, _) => size + 1} == l.size
