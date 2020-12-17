@@ -4,7 +4,10 @@ ThisBuild / scalaVersion     := "2.13.3"
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.brianpritchett"
 ThisBuild / organizationName := "Brian Pritchett"
-
+ThisBuild / organizationHomepage := Some(url("https://brianpritchett.com/"))
+ThisBuild / description := "A class for immutable linked lists of at least two elements."
+ThisBuild / licenses := List("MIT" -> new URL("https://opensource.org/licenses/MIT"))
+ThisBuild / homepage := Some(url("https://github.com/pritchett/twopluslist"))
 
 lazy val root = (project in file("."))
   .settings(
@@ -14,4 +17,26 @@ lazy val root = (project in file("."))
     testFrameworks += new TestFramework("munit.Framework")
   )
 
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/pritchett/twopluslist"),
+    "scm:git@github.com:pritchett/twopluslist.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(
+    id    = "pritchett",
+    name  = "Brian Pritchett",
+    email = "brian@brianpritchett.com",
+    url   = url("https://brianpritchett.com")
+  )
+)
+
+// Remove all additional repository other than Maven Central from POM
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / publishMavenStyle := true
