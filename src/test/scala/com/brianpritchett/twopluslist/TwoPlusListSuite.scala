@@ -75,6 +75,13 @@ class TwoPlusListSuite extends ScalaCheckSuite {
     }
   }
 
+  property("concatenated list is in the right order") {
+    forAll { (l: TwoPlusList[Int], r: TwoPlusList[Int]) =>
+      val cat = l ::: r
+      cat.startsWith(l) && cat.endsWith(r)
+    }
+  }
+
   property("toList constructs a correct list") {
     forAll { (n1: Int, n2: Int, ns: List[Int]) =>
       TwoPlusList.of(n1, n2, ns: _*).toList == n1 :: n2 :: ns
